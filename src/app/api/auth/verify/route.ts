@@ -18,10 +18,9 @@ export async function POST(req: Request) {
 
     const newProfile = new Profile({
       user: user.id,
-      email: user.email,
-      username: user.username,
-      firstName: "",
-      lastName: "",
+      firstName: "New",
+      lastName: "User",
+      isPublished: false,
     });
 
     await newProfile.save();

@@ -1,7 +1,7 @@
 // app/api/admin/signup/route.ts
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/lib/mailer";
 import { generateVerificationCode } from "@/lib/functions";
 import { generateUsername } from "@/lib/server-utils";
