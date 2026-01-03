@@ -7,11 +7,16 @@ import { generateVerificationCode } from "@/lib/functions";
 import { generateUsername } from "@/lib/server-utils";
 import connectDB from "@/lib/db";
 import { User } from "@/lib/models/User";
+import { NSIdentity } from "@/lib/models/NSIdentity";
 
 const schema = z.object({
-  phoneNumber: z.string().min(10),
   email: z.string().email(),
   password: z.string().min(8),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  country: z.string().optional(),
+  // phoneNumber is optional now or later
+  phone: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -27,7 +32,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { phoneNumber, email, password } = parsed.data;
+    const { phone, email, password } = parsed.data;
 
     const existingAdmin = await User.findOne({ email });
 
@@ -44,7 +49,7 @@ export async function POST(req: Request) {
     const verificationCode = generateVerificationCode();
 
     const newUser = new User({
-      phoneNumber,
+      phone,
       email,
       password: hashedPassword,
       username,

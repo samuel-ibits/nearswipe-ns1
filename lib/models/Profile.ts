@@ -2,26 +2,38 @@ import mongoose from "mongoose";
 
 const ProfileSchema = new mongoose.Schema(
   {
-    user: {
+    nsId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "NSIdentity",
       required: true,
     },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    company: { type: String },
-    position: { type: String },
-    picture: { type: String },
-    socialMedia: [
+    profileType: {
+      type: String,
+      enum: ["business", "personal", "custom"],
+      default: "personal",
+    },
+    brandName: { type: String, required: true }, // Display name or Company name
+    description: { type: String },
+
+    // Flexible arrays for contacts/socials rather than fixed structure
+    socials: [
       {
-        platform: { type: String, required: true },
-        url: { type: String, required: true },
-        icon: { type: String }, // Optional: to store icon class or name if needed
-      },
+        platform: { type: String }, // e.g., 'linkedin', 'twitter'
+        url: { type: String },
+        label: { type: String }, // User friendly label
+      }
     ],
-    isPublished: { type: Boolean, default: false },
+    websites: [
+      {
+        url: { type: String },
+        label: { type: String },
+      }
+    ],
+
+    theme: { type: String, default: "light" }, // light/dark or specific theme ID
+    isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
 
 export const Profile =
