@@ -13,8 +13,8 @@ export const ProfilePreview: React.FC<ProfilePreviewProps> = ({
     onClose,
 }) => {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="relative w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+            <div className="relative w-full max-w-sm bg-white rounded-[2rem] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200 border-4 border-gray-900">
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 z-10 p-2 bg-black/10 hover:bg-black/20 rounded-full transition-colors"
@@ -23,61 +23,61 @@ export const ProfilePreview: React.FC<ProfilePreviewProps> = ({
                 </button>
 
                 {/* Profile Header Background */}
-                <div className="h-32 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+                <div className="h-40 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
 
                 <div className="px-6 pb-8">
                     {/* Avatar */}
-                    <div className="relative -mt-12 mb-4">
-                        <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-100 shadow-md">
-                            {profile.picture ? (
-                                <img
-                                    src={profile.picture}
-                                    alt={profile.firstName}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-400">
-                                    {profile.firstName?.[0]}
-                                </div>
-                            )}
+                    <div className="relative -mt-16 mb-6 flex justify-center">
+                        <div className="w-32 h-32 rounded-full border-8 border-white overflow-hidden bg-gradient-to-br from-amber-400 to-orange-600 shadow-xl flex items-center justify-center">
+                            <span className="text-4xl font-bold text-white">
+                                {profile.brandName.substring(0, 2).toUpperCase()}
+                            </span>
                         </div>
                     </div>
 
                     {/* Info */}
-                    <div className="text-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            {profile.firstName} {profile.lastName}
+                    <div className="text-center mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                            {profile.brandName}
                         </h2>
-                        <p className="text-gray-600 font-medium">{profile.position}</p>
-                        <p className="text-gray-500 text-sm">{profile.company}</p>
+                        <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full uppercase tracking-wide">
+                            {profile.profileType}
+                        </span>
+                        {profile.description && (
+                            <p className="text-gray-600 mt-4 leading-relaxed text-sm">
+                                {profile.description}
+                            </p>
+                        )}
                     </div>
 
                     {/* Social Links */}
                     <div className="space-y-3">
                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {profile.socialMedia?.map((social: any, idx: number) => (
+                        {profile.socials?.map((social: any, idx: number) => (
                             <a
                                 key={idx}
                                 href={social.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-100"
+                                className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all border border-gray-100 hover:shadow-md group"
                             >
-                                {/* Fallback Icon */}
-                                <span className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-lg text-xs font-bold text-gray-600">
+                                {/* Icon Placeholder */}
+                                <span className="w-10 h-10 flex items-center justify-center bg-white rounded-full text-lg shadow-sm border border-gray-100 group-hover:scale-110 transition-transform">
                                     {social.platform[0]}
                                 </span>
-                                <span className="flex-1 font-medium text-gray-700">
-                                    {social.platform}
-                                </span>
-                                <span className="text-xs text-gray-400">↗</span>
+                                <div className="flex-1">
+                                    <p className="font-bold text-gray-900 text-sm">{social.platform}</p>
+                                    <p className="text-xs text-gray-400 truncate">{social.url}</p>
+                                </div>
+                                <span className="text-gray-300 group-hover:translate-x-1 transition-transform">→</span>
                             </a>
                         ))}
                     </div>
 
-                    <div className="mt-8 text-center">
-                        <button className="w-full py-3 bg-black text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
-                            Save Contact
+                    <div className="mt-8">
+                        <button className="w-full py-4 bg-black text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:gap-2 transition-all flex items-center justify-center gap-1 group">
+                            <span>Save Contact</span>
+                            <span className="group-hover:translate-x-1 transition-transform">→</span>
                         </button>
                     </div>
                 </div>

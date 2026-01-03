@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import { Profile } from "@/lib/models/Profile";
-import { NSIdentity } from "@/lib/models/NSIdentity";
+import { getOrCreateIdentity } from "@/lib/identity";
 import { requireAuth } from "@/lib/middleware/requireAuth";
 
 async function getIdentityId(req: NextRequest) {
     const decoded = requireAuth(req);
     await dbConnect();
-    const identity = await NSIdentity.findOne({ user_id: decoded.sub });
-    if (!identity) throw new Error("Identity not found");
+    // Robustly get identity
+    const identity = await getOrCreateIdentity(decoded.sub);
     return identity._id;
 }
 

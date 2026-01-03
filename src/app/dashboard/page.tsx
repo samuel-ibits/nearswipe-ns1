@@ -8,13 +8,12 @@ import { ProfilePreview } from "@/components/profile/ProfilePreview";
 
 interface Profile {
     _id: string;
-    firstName: string;
-    lastName: string;
-    company: string;
-    position: string;
-    picture: string;
-    isPublished: boolean;
-    socialMedia: { platform: string; url: string }[];
+    brandName: string;
+    description?: string;
+    profileType: "personal" | "business" | "custom";
+    socials: { platform: string; url: string }[];
+    theme: string;
+    isActive: boolean;
 }
 
 export default function DashboardPage() {
@@ -33,7 +32,7 @@ export default function DashboardPage() {
         try {
             const res = await fetch("/api/profiles");
             if (res.status === 401) {
-                router.push("/login"); // Adjust route as per auth flow
+                router.push("/auth/login");
                 return;
             }
             const data = await res.json();
@@ -46,27 +45,27 @@ export default function DashboardPage() {
     };
 
     const handleSave = async (data: any) => {
-        try {
-            const method = editingProfile ? "PUT" : "POST";
-            const url = editingProfile
-                ? `/api/profiles/${editingProfile._id}`
-                : "/api/profiles";
+        // Remove catch block to let ProfileForm handle errors
+        const method = editingProfile ? "PUT" : "POST";
+        const url = editingProfile
+            ? `/api/profiles/${editingProfile._id}`
+            : "/api/profiles";
 
-            const res = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
+        const res = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
 
-            if (!res.ok) throw new Error("Failed to save");
+        const responseData = await res.json();
 
-            await fetchProfiles();
-            setIsEditing(false);
-            setEditingProfile(null);
-        } catch (error) {
-            console.error(error);
-            alert("Failed to save profile");
+        if (!res.ok) {
+            throw new Error(responseData.message || responseData.error || "Failed to save");
         }
+
+        await fetchProfiles();
+        setIsEditing(false);
+        setEditingProfile(null);
     };
 
     const handleDelete = async (id: string) => {
@@ -85,17 +84,20 @@ export default function DashboardPage() {
         }
     };
 
-    const handlePublish = async (id: string) => {
+    const handlePublish = async (id: string, currentStatus: boolean) => {
+        // Toggle isActive
         try {
-            const res = await fetch(`/api/profiles/${id}/publish`, {
-                method: "PATCH",
+            const res = await fetch(`/api/profiles/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isActive: !currentStatus })
             });
 
-            if (!res.ok) throw new Error("Failed to publish");
+            if (!res.ok) throw new Error("Failed to update status");
             await fetchProfiles();
         } catch (error) {
             console.error(error);
-            alert("Failed to publish profile");
+            alert("Failed to update profile status");
         }
     };
 
@@ -127,7 +129,7 @@ export default function DashboardPage() {
                 {loading ? (
                     <div className="text-center py-20 text-gray-500">Loading...</div>
                 ) : isEditing ? (
-                    <div className="max-w-2xl mx-auto bg-white/5 border border-white/10 p-8 rounded-2xl">
+                    <div className="w-full">
                         <ProfileForm
                             initialData={editingProfile}
                             onSubmit={handleSave}
@@ -162,7 +164,7 @@ export default function DashboardPage() {
                                     setIsEditing(true);
                                 }}
                                 onPreview={setPreviewProfile}
-                                onPublish={handlePublish}
+                                onPublish={() => handlePublish(profile._id, profile.isActive)}
                                 onDelete={handleDelete}
                             />
                         ))}

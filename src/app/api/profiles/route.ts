@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import { Profile } from "@/lib/models/Profile";
-import { NSIdentity } from "@/lib/models/NSIdentity";
+import { getOrCreateIdentity } from "@/lib/identity"; // Import new helper
 import { requireAuth } from "@/lib/middleware/requireAuth";
 
 export async function GET(req: NextRequest) {
@@ -9,11 +9,8 @@ export async function GET(req: NextRequest) {
         const decoded = requireAuth(req);
         await dbConnect();
 
-        // Resolve Identity first
-        const identity = await NSIdentity.findOne({ user_id: decoded.sub });
-        if (!identity) {
-            return NextResponse.json({ message: "Identity not found" }, { status: 404 });
-        }
+        // Resolve Identity (Robustly)
+        const identity = await getOrCreateIdentity(decoded.sub);
 
         const profiles = await Profile.find({ nsId: identity._id }).sort({
             isActive: -1, // Active first
@@ -27,7 +24,7 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
         return NextResponse.json(
-            { message: "Internal Server Error" },
+            { message: "Internal Server Error", error: err.message },
             { status: 500 }
         );
     }
@@ -38,11 +35,8 @@ export async function POST(req: NextRequest) {
         const decoded = requireAuth(req);
         await dbConnect();
 
-        // Resolve Identity first
-        const identity = await NSIdentity.findOne({ user_id: decoded.sub });
-        if (!identity) {
-            return NextResponse.json({ message: "Identity not found" }, { status: 404 });
-        }
+        // Resolve Identity (Robustly)
+        const identity = await getOrCreateIdentity(decoded.sub);
 
         const body = await req.json();
 
