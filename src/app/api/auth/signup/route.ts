@@ -32,11 +32,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const { phone, email, password } = parsed.data;
+    const { email, password, firstName, lastName, country, phone } = parsed.data;
 
-    const existingAdmin = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
-    if (existingAdmin) {
+    if (existingUser) {
       return NextResponse.json(
         { message: "Email already registered" },
         { status: 400 }
@@ -45,25 +45,38 @@ export async function POST(req: Request) {
 
     const joinedAt = new Date();
     const hashedPassword = await bcrypt.hash(password, 12);
-    const username = await generateUsername(joinedAt);
+    // Generate base username from email or name
+    const baseName = firstName && lastName ? `${firstName}${lastName}` : email.split('@')[0];
+    const username = await generateUsername(baseName);
     const verificationCode = generateVerificationCode();
 
     const newUser = new User({
-      phone,
       email,
       password: hashedPassword,
-      username,
+      firstName,
+      lastName,
+      country,
+      phone,
       verificationCode,
       isVerified: false,
-      joinedAt,
+      created_at: joinedAt,
+      // Status and Role will use defaults from Model ('active', 'user')
     });
 
-    await newUser.save();
+    const savedUser = await newUser.save();
+
+    // Create NSIdentity automatically
+    const newIdentity = new NSIdentity({
+      user_id: savedUser._id,
+      username: username, // Assign generated username to Identity
+    });
+
+    await newIdentity.save();
 
     await sendVerificationEmail(email, verificationCode);
 
     return NextResponse.json(
-      { message: "Verification code sent to your email" },
+      { message: "Verification code sent to your email", userId: savedUser._id, nsId: newIdentity._id },
       { status: 200 }
     );
   } catch (error) {

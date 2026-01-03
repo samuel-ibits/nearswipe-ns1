@@ -4,8 +4,8 @@ import { verifyOtpAndGenerateToken } from "@/lib/otp";
 import type { VerifiedAdmin } from "@/types/auth";
 import { sendWelcomeEmail } from "@/lib/mailer";
 import connectDB from "@/lib/db";
-import { Profile } from "@/lib/models/Profile";
-import Wallet from "@/lib/models/Wallet";
+// import { Profile } from "@/lib/models/Profile";
+// import Wallet from "@/lib/models/Wallet";
 
 export async function POST(req: Request) {
   const { otp } = await req.json();
@@ -16,19 +16,12 @@ export async function POST(req: Request) {
 
     await connectDB();
 
-    const newProfile = new Profile({
-      user: user.id,
-      firstName: "New",
-      lastName: "User",
-      isPublished: false,
-    });
+    // V1 Refactor: Profile creation is now explicit on Dashboard.
+    // Wallet creation is deferred or removed for V1 scope.
 
-    await newProfile.save();
-
-    await Wallet.create({
-      userId: user.id,
-      balance: 0,
-    });
+    // Check if Identity exists (it should from signup)
+    // We might want to return the NSID to the frontend if needed
+    // const identity = await NSIdentity.findOne({ user_id: user.id });
 
     const accessCookie = serialize("access-token", accessToken, {
       httpOnly: true,
@@ -46,7 +39,7 @@ export async function POST(req: Request) {
       path: "/",
     });
 
-    const response = new NextResponse(JSON.stringify({ success: true }), {
+    const response = new NextResponse(JSON.stringify({ success: true, message: "Account Verified" }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

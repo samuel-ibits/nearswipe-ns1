@@ -22,12 +22,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (user.role !== role) {
-    return NextResponse.json(
-      { message: "Unauthorized" },
-      { status: 403 }
-    );
-  }
+  // if (user.role !== role) {
+  //   return NextResponse.json(
+  //     { message: "Unauthorized" },
+  //     { status: 403 }
+  //   );
+  // }
 
   if (!(await verifyPassword(password, user.password))) {
     return NextResponse.json(
@@ -49,13 +49,11 @@ export async function POST(req: NextRequest) {
   user.refreshTokenJTI = newJTI;
   await user.save();
 
-  const accessCookie = `access-token=${accessToken}; HttpOnly; Path=/; Max-Age=${
-    60 * 60 * 24 * 7
-  }; ${process.env.NODE_ENV === "production" ? "Secure; SameSite=Lax;" : ""}`;
+  const accessCookie = `access-token=${accessToken}; HttpOnly; Path=/; Max-Age=${60 * 60 * 24 * 7
+    }; ${process.env.NODE_ENV === "production" ? "Secure; SameSite=Lax;" : ""}`;
 
-  const refreshCookie = `refresh-token=${refreshToken}; HttpOnly; Path=/; Max-Age=${
-    60 * 60 * 24 * 7
-  }; ${process.env.NODE_ENV === "production" ? "Secure; SameSite=Lax;" : ""}`;
+  const refreshCookie = `refresh-token=${refreshToken}; HttpOnly; Path=/; Max-Age=${60 * 60 * 24 * 7
+    }; ${process.env.NODE_ENV === "production" ? "Secure; SameSite=Lax;" : ""}`;
 
   const response = new NextResponse(JSON.stringify({ success: true }), {
     status: 200,

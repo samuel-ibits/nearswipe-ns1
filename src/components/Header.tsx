@@ -77,8 +77,11 @@ export default function Header() {
                     </nav>
 
                     {/* CTA Button */}
-                    <div className="hidden md:block">
-                        <Link href="/shop" className="btn-primary text-sm">
+                    <div className="hidden md:flex items-center gap-4">
+                        <Link href="/auth/login" className="text-sm font-medium text-white hover:text-amber-500 transition-colors">
+                            Login
+                        </Link>
+                        <Link href="/auth/signup" className="btn-primary text-sm">
                             Get Your Card
                         </Link>
                     </div>
@@ -139,13 +142,22 @@ export default function Header() {
                         >
                             Talk to Sales
                         </button>
-                        <Link
-                            href="/shop"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="btn-primary text-center mt-2"
-                        >
-                            Get Your Card
-                        </Link>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                            <Link
+                                href="/auth/login"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="px-4 py-2 rounded-lg bg-white/5 text-center text-white hover:bg-white/10 transition-colors"
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                href="/auth/signup" // Changed to signup flow for 'Get Your Card' as it leads to onboarding
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="px-4 py-2 rounded-lg bg-amber-500 text-center text-black font-semibold hover:bg-amber-400 transition-colors"
+                            >
+                                Get Card
+                            </Link>
+                        </div>
                     </nav>
                 </div>
             </header>

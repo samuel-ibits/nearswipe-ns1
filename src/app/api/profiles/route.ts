@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import { Profile } from "@/lib/models/Profile";
+import { NSIdentity } from "@/lib/models/NSIdentity";
 import { requireAuth } from "@/lib/middleware/requireAuth";
 
 export async function GET(req: NextRequest) {
@@ -8,8 +9,15 @@ export async function GET(req: NextRequest) {
         const decoded = requireAuth(req);
         await dbConnect();
 
-        const profiles = await Profile.find({ user: decoded.sub }).sort({
-            createdAt: -1,
+        // Resolve Identity first
+        const identity = await NSIdentity.findOne({ user_id: decoded.sub });
+        if (!identity) {
+            return NextResponse.json({ message: "Identity not found" }, { status: 404 });
+        }
+
+        const profiles = await Profile.find({ nsId: identity._id }).sort({
+            isActive: -1, // Active first
+            created_at: -1,
         });
 
         return NextResponse.json({ profiles }, { status: 200 });
@@ -30,19 +38,25 @@ export async function POST(req: NextRequest) {
         const decoded = requireAuth(req);
         await dbConnect();
 
+        // Resolve Identity first
+        const identity = await NSIdentity.findOne({ user_id: decoded.sub });
+        if (!identity) {
+            return NextResponse.json({ message: "Identity not found" }, { status: 404 });
+        }
+
         const body = await req.json();
 
-        // If creating a published profile, unpublish others
-        if (body.isPublished) {
+        // If creating an active profile, deactivate others
+        if (body.isActive) {
             await Profile.updateMany(
-                { user: decoded.sub, isPublished: true },
-                { isPublished: false }
+                { nsId: identity._id, isActive: true },
+                { isActive: false }
             );
         }
 
         const newProfile = await Profile.create({
             ...body,
-            user: decoded.sub,
+            nsId: identity._id, // Link to Identity
         });
 
         return NextResponse.json({ profile: newProfile }, { status: 201 });
